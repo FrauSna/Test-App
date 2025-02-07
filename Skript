@@ -1,0 +1,78 @@
+import os
+import csv
+
+# Datei, die die Zugangscodes enthält
+CODES_FILE = 'access_codes.csv'
+# Datei, die die Benutzer und ihre zugewiesenen Codes enthält
+USERS_FILE = 'user_codes.csv'
+
+def load_codes():
+    if not os.path.exists(CODES_FILE):
+        print(f"Error: {CODES_FILE} not found.")
+        return []
+    with open(CODES_FILE, mode='r', newline='') as file:
+        reader = csv.reader(file)
+        return [row[0] for row in reader]
+
+def save_user_code(user, code):
+    with open(USERS_FILE, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([user, code])
+
+def assign_code():
+    codes = load_codes()
+    if not codes:
+        print("No codes available.")
+        return
+    
+    user = input("Please enter your name: ")
+    assigned_code = None
+    
+    # Check for an available code
+    with open(USERS_FILE, mode='r', newline='') as file:
+        reader = csv.reader(file)
+        used_codes = [row[1] for row in reader]
+        for code in codes:
+            if code not in used_codes:
+                assigned_code = code
+                break
+    
+    if assigned_code:
+        print(f"{user}, your access code is: {assigned_code}")
+        save_user_code(user, assigned_code)
+    else:
+        print("No available access codes.")
+
+def display_user_codes():
+    if not os.path.exists(USERS_FILE):
+        print(f"No users have been assigned codes yet.")
+        return
+    
+    with open(USERS_FILE, mode='r', newline='') as file:
+        reader = csv.reader(file)
+        print("User Codes:")
+        for row in reader:
+            print(f"User: {row[0]}, Code: {row[1]}")
+
+def main():
+    while True:
+        print("1. Assign access code")
+        print("2. Display user codes")
+        print("3. Exit")
+        choice = input("Choose an option: ")
+        
+        if choice == '1':
+            assign_code()
+        elif choice == '2':
+            display_user_codes()
+        elif choice == '3':
+            break
+        else:
+            print("Invalid option. Please try again.")
+
+if __name__ == '__main__':
+    # Create the users file if it doesn't exist
+    if not os.path.exists(USERS_FILE):
+        open(USERS_FILE, 'w').close()
+    
+    main()
